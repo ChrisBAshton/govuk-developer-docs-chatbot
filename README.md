@@ -4,6 +4,7 @@ A proof of concept. Not ready for use in earnest!
 
 Limitations:
 - Requires manually recompiling and re-uploading the Developer Docs to OpenAI
+- Doesn't pull in the 'external' `docs/` documents from other repos
 - No 'streaming' of answers, so quite slow
 - Can only run on the developer's machine. Would be better exposed as a web page (behind BasicAuth)
 - Context is lost between questions (so no ability for 'follow up' questions)
@@ -17,32 +18,34 @@ A working OpenAI API account (at <platform.openai.com>) with:
 - Some credit added (e.g. $5).
   - Several queries to the chatbot end up costing a couple of cents. Monitor costs in real time at <https://platform.openai.com/settings/organization/usage>.
 
-## Setup
+Once logged into your account, create an agent in the OpenAI platform:
 
-Prepare the documentation:
-
-```
-cd ~/govuk
-git clone https://github.com/alphagov/govuk-developer-docs.git
-```
-
-Process the documentation (this generates a `doc_chunks` directory in this repo):
-
-```
-DEVELOPER_DOCS_DIR="/Users/christopher.ashton/govuk/govuk-developer-docs/source/manual" \
-bundle exec ruby doc_squasher.rb
-```
-
-Create an agent in the OpenAI platform:
-
-- E.g. <https://platform.openai.com/assistants/asst_pk1RqMtIhOWjmfzP1pZVcGHf>
+- Visit <https://platform.openai.com/assistants> and click "Create"
+- Give it a name (e.g. "GOV.UK Developer Docs Chatbot"
+- For system instructions, add something like: `You are a helpful assistant trained on GOV.UK Developer Docs  (attached as files to this assistant). If the answer is not found in the documentation, respond with: "I don’t know based on the provided documentation"`.
 - Enable the "File Search" toggle
-- Add files: drag the generated .txt files into the window and 'attach' them to the agent
+- Add files by clicking on "Files" and then dragging the generated .txt files into the window and 'attach' them to the agent
 - Set model as `gpt-4o-mini` (good balance of quality result vs low cost)
 
-Create an API key for interacting with the agent:
+Create an API key for interacting with the agent, and store it somewhere safe - you'll need it later!
 
 - <https://platform.openai.com/settings/organization/api-keys>
+
+## Setup
+
+Clone the govuk-developer-docs-chatbot repo and run `bundle install`.
+
+Clone the govuk-developer-docs repo somewhere on your machine (if you haven't already) and expose the path to its `manual` folder, as an ENV var:
+
+```
+DEVELOPER_DOCS_DIR="/Users/christopher.ashton/govuk/govuk-developer-docs/source/manual"
+```
+
+Now, process the documentation (this grabs the docs from the DEVELOPER_DOCS_DIR and generates a `doc_chunks` directory in this repo):
+
+```
+bundle exec ruby doc_squasher.rb
+```
 
 ## Usage
 
